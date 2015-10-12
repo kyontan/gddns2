@@ -11,4 +11,4 @@ zones:
 - name: example.yokohama
   domains:
   - akihabara.example.tokyo.
-  - sinjuku.example.tokyo.
+  - shinjuku.example.tokyo.
