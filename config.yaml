@@ -1,0 +1,14 @@
+---
+api:
+  base: https://api.gis.gehirn.jp/dns/v1/
+  token: API_TOKEN
+  secret: API_SECRET
+zones:
+- name: mideshi.example.moe
+  domains:
+  - kobeni.yonomori.example.moe.
+  - mashiro.mitsumine.example.moe.
+- name: example.yokohama
+  domains:
+  - akihabara.example.tokyo.
+  - sinjuku.example.tokyo.
