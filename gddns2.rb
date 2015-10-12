@@ -92,19 +92,19 @@ gehirn_dns.token = config["api"]["token"]
 gehirn_dns.secret = config["api"]["secret"]
 gehirn_dns.logger = logger
 
+new_ip = \
+if ARGV.length == 1
+  ARGV[0]
+else
+  get_global_ip
+end
+
 # get zones list
 begin
   zones = gehirn_dns.get("zones")
 rescue => e
   logger.error(e.to_s)
   exit
-end
-
-new_ip = \
-if ARGV.length == 1
-  ARGV[0]
-else
-  get_global_ip
 end
 
 config["zones"].each do |config_zone|
@@ -117,6 +117,7 @@ config["zones"].each do |config_zone|
   zone_id = dns_zone["id"]
   zone_version = dns_zone["current_version_id"]
 
+  # get records of zone
   begin
     dns_records = gehirn_dns.get("zones/#{zone_id}/versions/#{zone_version}/records")
   rescue => e
@@ -133,10 +134,12 @@ config["zones"].each do |config_zone|
 
     dns_record_id = dns_record["id"]
 
+    # check whether record to be updated
     if dns_record["address"] != new_ip
       new_record = dns_record.dup
       new_record["address"] = new_ip
 
+      # update record
       begin
         gehirn_dns.put("zones/#{zone_id}/versions/#{zone_version}/records/#{dns_record_id}", new_record.to_json)
 
