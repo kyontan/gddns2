@@ -10,8 +10,8 @@ An DDNS client for Gehirn DNS of [Gehirn Infrastructure Service](https://www.geh
 
 Caution: gddns2 requires API key/secret with *below permission*
 
-- *Full Access* for General Management of DNS
-- *Full Access* of zone which you want update by gddns2
+- *Read* of Zones in General Management of DNS
+- *Full Access* of zone which you want update by gddns2 in Zones
 
 ## Information
 
