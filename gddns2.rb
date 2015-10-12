@@ -44,11 +44,11 @@ class GehirnDNS
     req.basic_auth(token, secret)
     response = http.request(req)
 
-    if response.code.to_i != 200
+    if (code = response.code.to_i) != 200
       begin
-        error = "Failed to request. description: #{JSON.parse(response.body)["message"]}"
+        error = "Failed to request. got #{code} description: #{JSON.parse(response.body)["message"]}"
       rescue
-        error = "Failed to request, couldn't access to server."
+        error = "Failed to request, got #{code}. couldn't access to server."
       end
 
       raise error
@@ -97,6 +97,7 @@ begin
   zones = gehirn_dns.get("zones")
 rescue => e
   logger.error(e.to_s)
+  exit
 end
 
 new_ip = \
