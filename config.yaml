@@ -1,0 +1,12 @@
+---
+api:
+  base: https://api.gis.gehirn.jp/dns/v1/
+  token: e994e8df-21ce-4a79-b43d-70016a2871e5
+  secret: UAMbodiOLjUQBkm7CsnGRKJRBERPii06G2txvcn6Kle1OG4rGMv2SpnXkunqGccNu1PjH6Ph0mLT5eeWu1PRELP3qDF8x9A08of9RwibyCAmJfAo34MrnvxfTRlH2IIi
+zones:
+- name: monora.me
+  domains:
+  - monora.me.
+- name: pref.yokohama
+  domains:
+  - pref.yokohama.

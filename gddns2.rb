@@ -8,7 +8,10 @@ require "logger"
 require "open-uri"
 
 CONFIG_FILE = "config.yaml"
-LOG_FILE = "gddns2.log"
+LOG_FILE    = "gddns2.log"
+
+DEFAULT_TTL = 300
+DEFAULT_OPTION = { "ttl" => DEFAULT_TTL }
 
 def get_global_ip
   open("http://ipinfo.io/ip").read.strip
@@ -108,43 +111,51 @@ rescue => e
 end
 
 config["zones"].each do |config_zone|
-  dns_zone = zones.select{|z| z["name"] == config_zone["name"] }.first
-  if dns_zone.nil?
-    logger.info("Not found zone: #{config_zone["name"]}")
+  zone = zones.find{|z| z["name"] == config_zone["name"] }
+  if zone.nil?
+    logger.info("Zone not found: #{config_zone["name"]}")
     next
   end
 
-  zone_id = dns_zone["id"]
-  zone_version = dns_zone["current_version_id"]
+  zone_id = zone["id"]
+  current_version_id = zone["current_version_id"]
 
   # get records of zone
   begin
-    dns_records = gehirn_dns.get("zones/#{zone_id}/versions/#{zone_version}/records")
+    record_sets = gehirn_dns.get("zones/#{zone_id}/versions/#{current_version_id}/records")
   rescue => e
     logger.error(e.to_s)
     next
   end
 
-  config_zone["domains"].each do |domain|
-    dns_record = dns_records.select{|r| r["name"] == domain && r["type"] == "A" }.first
-    if dns_record.nil?
-      logger.info("Not found record: #{domain}, create a record first.")
+  config_zone["domains"].each do |domain_name, options|
+    record_set = record_sets.find{|r| r["name"] == domain_name && r["type"] == "A" }
+    if record_set.nil?
+      logger.info("Record not found: #{domain_name}, create a record first.")
       next
     end
 
-    dns_record_id = dns_record["id"]
+    options ||= DEFAULT_OPTION # if domains is a Array
 
     # check whether record to be updated
-    if dns_record["address"] != new_ip
-      new_record = dns_record.dup
-      new_record["address"] = new_ip
+
+    if record_set["records"].first["address"] != new_ip
+      new_record = {
+        name: domain_name,
+        type: "A",
+        enable_alias: false,
+        ttl: options["ttl"],
+        records: {
+          address: new_ip
+        }
+      }
 
       # update record
       begin
-        gehirn_dns.put("zones/#{zone_id}/versions/#{zone_version}/records/#{dns_record_id}", new_record.to_json)
+        gehirn_dns.put("zones/#{zone_id}/versions/#{current_version_id}/records/#{record_set["id"]}", new_record.to_json)
 
         log_detail = "Updated: %s in %s from %s to %s"
-        logger.info(log_detail % [domain, dns_zone["name"], dns_record["address"], new_ip])
+        logger.info(log_detail % [config_domain, zone["name"], record_set["name"], new_ip])
       rescue => e
         logger.error(e.to_s)
       end
