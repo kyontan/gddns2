@@ -70,6 +70,7 @@ class GehirnDNS
   def post(endpoint, data)
     request = Net::HTTP::Post.new(base_uri.path + endpoint)
     request.body = data
+    request.content_type = "application/json"
     response = request(request)
     JSON.parse(response)
   end
@@ -77,6 +78,7 @@ class GehirnDNS
   def put(endpoint, data)
     request = Net::HTTP::Put.new(base_uri.path + endpoint)
     request.body = data
+    request.content_type = "application/json"
     response = request(request)
     JSON.parse(response)
   end
@@ -145,9 +147,9 @@ config["zones"].each do |config_zone|
         type: "A",
         enable_alias: false,
         ttl: options["ttl"],
-        records: {
+        records: [{
           address: new_ip
-        }
+        }]
       }
 
       # update record
@@ -155,7 +157,7 @@ config["zones"].each do |config_zone|
         gehirn_dns.put("zones/#{zone_id}/versions/#{current_version_id}/records/#{record_set["id"]}", new_record.to_json)
 
         log_detail = "Updated: %s in %s from %s to %s"
-        logger.info(log_detail % [config_domain, zone["name"], record_set["name"], new_ip])
+        logger.info(log_detail % [domain_name, zone["name"], record_set["name"], new_ip])
       rescue => e
         logger.error(e.to_s)
       end
